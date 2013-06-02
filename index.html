@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Sushi by Distrotech</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Sushi</h1>
+        <h2>Apache Websocket Shell</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/Distrotech/sushi/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/Distrotech/sushi/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/Distrotech/sushi" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a name="sushi" class="anchor" href="#sushi"><span class="octicon octicon-link"></span></a>sushi</h1>
+
+<p>SetUid SHell Interactive - Apache Websocket Shell</p>
+
+<p>using the apache websocket module create a shell plugin that can allow users / admin to open a shell
+in a VT100 javascript popup.</p>
+
+<p>The following vt100 javascript package works out the box and is a fork of shellinabox<br><a href="http://wasd.vsm.com.au/wasd_root/src/dclinabox/readmore.html">http://wasd.vsm.com.au/wasd_root/src/dclinabox/readmore.html</a></p>
+
+<p>they include a websock library and daemon that i aim to replace.</p>
+
+<p>Using the apache-websockts module the dumb protocol i plan to implement the code into a plugin.
+<a href="https://github.com/disconnect/apache-websocket">https://github.com/disconnect/apache-websocket</a></p>
+
+<p>the plugin needs to create a thread, fork a pty running a shell and pass communication from the web socket to the pty.</p>
+
+<p>sushi is a setuid wrapper similaer in purpose to suexec but with the purpose of been a "getty" it authenticates
+the user against PAM and spawns login "pre authenticated" allowing better control of the process.</p>
+
+<p>the wrapper is setuid/setgid [chmod 6755] and performs the following</p>
+
+<ul>
+<li>Authenticate the user [account/session should be opened not yet]</li>
+<li>Make sure there is a passwd ent for the user authenticating</li>
+<li>Initialise the groups to that of the user loging in</li>
+<li>Some *BLACK MAGIC* if the user is a member of a SU group allow him SU access [sudo sh]</li>
+<li>Set the ruid/guid to that of the user [possibly SU see 4]</li>
+<li>chdir to the users home dir</li>
+</ul><p>if any of these except for 4 fail the wrapper will fail this is not as "strict" as suexec nor is needed to be,
+we are authenticating the user.</p>
+
+<p>on success login is forked/exec we should be passing the host info and enviroment one day
+waitpid will get the result code and return with it.</p>
+
+<h1>
+<a name="sushipty" class="anchor" href="#sushipty"><span class="octicon octicon-link"></span></a>sushipty</h1>
+
+<p>this is a scratch pad app eventually to be moved into a apache websockets plugin it runs sushi with forkpty
+it puts STDIN into RAW mode sets the pty size to that of STDOUT.</p>
+
+<p>two threads are used for IO in blocking mode as opposed to using select/O_NONBLOCK for one having std... in 
+non blocking is a plan spawned by satan and we only require one thread when its put into a apache websocket plugin.</p>
+
+<p>ideally as the functions are the same we could call the same function for both threads with appropriate *pvt.</p>
+
+<p>sushipty accepts username and password as args that it passes to sushi these are optional and at least the password
+is stupid to pass on the command line.</p>
+
+<p>that said stupid is as stupid does .... so the command line of sushipty and sush is bodged so that all args vanish
+as soon as possible.</p>
+
+<p>the password should be passed via stdin and will be done automagically if basic auth is used for the /location in
+apache.</p>
+
+<p>this is very much WIP/RFC</p>
+
+<h1>
+<a name="building" class="anchor" href="#building"><span class="octicon octicon-link"></span></a>building</h1>
+
+<p>autotools have been added for convinence please note its a "basic" setup.
+you need to be root to install [chown/chmod] use "sudo make install"</p>
+
+<p>./configure &amp;&amp; make &amp;&amp; sudo make install</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
